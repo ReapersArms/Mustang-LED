@@ -53,7 +53,7 @@
 //!
 //! A very simple example that can be used as a starting point for more complex
 //! projects.  Most notably, this project is fully TI BSD licensed, so any and
-//! all of the code (including the startup code) can be used as allowed by that
+//! all of the code (including the startup code) can be used as allowed by that55
 //! license.
 //!
 //! The provided code simply toggles a GPIO using the Tiva Peripheral Driver
@@ -75,46 +75,80 @@ __error__(char *pcFilename, uint32_t ui32Line)
 
 //*****************************************************************************
 //
-// Toggle a GPIO.
+// Function to cycle LEDs
+//
+//*****************************************************************************
+
+
+
+
+//*****************************************************************************
+//
+// Function to cycle LEDs
+//
+//*****************************************************************************
+
+void cycle_leds(void) {
+	int i = 0;
+	for (i=0; i<3; i++) {
+		switch (i) {
+		case 0:
+			ROM_GPIOPinWrite(GPIO_PORTF_BASE, GPIO_PIN_1, GPIO_PIN_1);
+			break;
+		case 1:
+			ROM_GPIOPinWrite(GPIO_PORTF_BASE, GPIO_PIN_2, GPIO_PIN_2);
+			break;
+		case 2:
+			ROM_GPIOPinWrite(GPIO_PORTF_BASE, GPIO_PIN_3, GPIO_PIN_3);
+			break;
+		}
+
+		ROM_SysCtlDelay(1000000);
+
+        // Write all pins low just for easy code
+        ROM_GPIOPinWrite(GPIO_PORTF_BASE, GPIO_PIN_1 | GPIO_PIN_2 | GPIO_PIN_3, 0);
+
+        // Delay for a while.
+        ROM_SysCtlDelay(1000000);
+	}
+}
+
+//*****************************************************************************
+//
+// Hardware Initialization
+//
+//*****************************************************************************
+void hardwareInit(void) {
+    //
+    // Enable the GPIO module.
+    //
+    ROM_SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOF);
+    ROM_SysCtlDelay(1);
+
+    //
+    // Configure PF1 as an output.
+    //
+    ROM_GPIOPinTypeGPIOOutput(GPIO_PORTF_BASE, GPIO_PIN_1);
+    ROM_GPIOPinTypeGPIOOutput(GPIO_PORTF_BASE, GPIO_PIN_2);
+    ROM_GPIOPinTypeGPIOOutput(GPIO_PORTF_BASE, GPIO_PIN_3);
+}
+
+//*****************************************************************************
+//
+// Main Application Entrance
 //
 //*****************************************************************************
 int
 main(void)
 {
-    //
-    // Enable the GPIO module.
-    //
-    ROM_SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOA);
-    ROM_SysCtlDelay(1);
+	hardwareInit();
 
-    //
-    // Configure PA1 as an output.
-    //
-    ROM_GPIOPinTypeGPIOOutput(GPIO_PORTA_BASE, GPIO_PIN_1);
-
-    //
     // Loop forever.
-    //
     while(1)
     {
-        //
-        // Set the GPIO high.
-        //
-        ROM_GPIOPinWrite(GPIO_PORTA_BASE, GPIO_PIN_1, GPIO_PIN_1);
-
-        //
-        // Delay for a while.
-        //
-        ROM_SysCtlDelay(1000000);
-
-        //
-        // Set the GPIO low.
-        //
-        ROM_GPIOPinWrite(GPIO_PORTA_BASE, GPIO_PIN_1, 0);
-
-        //
-        // Delay for a while.
-        //
-        ROM_SysCtlDelay(1000000);
+        // Cycle LEDs
+    	if (0) {
+    		cycle_leds();
+    	}
     }
 }
