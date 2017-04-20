@@ -5,6 +5,7 @@ software/.metadata
 software/RemoteSystemsTempFiles
 software/*/*.Build/
 software/qs-rgb
+software/uart_echo
 software/mustang-led/Debug
 software/mustang-led/.settings
 software/mustang-led/.launches
