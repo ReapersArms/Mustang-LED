@@ -68,6 +68,13 @@ extern uint32_t __STACK_TOP;
 
 //*****************************************************************************
 //
+// External declaration for the interrupt handler used by the application.
+//
+//*****************************************************************************
+extern void UARTIntHandler(void);
+
+//*****************************************************************************
+//
 // The vector table.  Note that the proper constructs must be placed on this to
 // ensure that it ends up at physical address 0x0000.0000 or at the start of
 // the program if located at a start address other than 0.
@@ -98,7 +105,7 @@ void (* const g_pfnVectors[])(void) =
     IntDefaultHandler,                      // GPIO Port C
     IntDefaultHandler,                      // GPIO Port D
     IntDefaultHandler,                      // GPIO Port E
-    IntDefaultHandler,                      // UART0 Rx and Tx
+	UARTIntHandler,		                    // UART0 Rx and Tx
     IntDefaultHandler,                      // UART1 Rx and Tx
     IntDefaultHandler,                      // SSI0 Rx and Tx
     IntDefaultHandler,                      // I2C0 Master and Slave
