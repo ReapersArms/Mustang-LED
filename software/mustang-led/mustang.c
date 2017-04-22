@@ -51,9 +51,14 @@
 #include "driverlib/interrupt.h"
 #include "driverlib/pin_map.h"
 #include "driverlib/uart.h"
+// from qs-rgb
+#include "utils/uartstdio.h"
+#include "utils/cmdline.h"
+
+
 
 // Project Includes
-#include "m_uart.h"
+//#include "m_uart.h"
 
 //*****************************************************************************
 //
@@ -138,21 +143,106 @@ void hardwareInit(void) {
 
 //*****************************************************************************
 //
+// UART Configuration
+//
+//*****************************************************************************
+void uartInit(void) {
+	//
+	// Enable the GPIO Peripheral used by the UART.
+	//
+	ROM_SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOA);
+
+	//
+	// Enable UART0
+	//
+	ROM_SysCtlPeripheralEnable(SYSCTL_PERIPH_UART0);
+
+	//
+	// Configure GPIO Pins for UART mode.
+	//
+	ROM_GPIOPinConfigure(GPIO_PA0_U0RX);
+	ROM_GPIOPinConfigure(GPIO_PA1_U0TX);
+	ROM_GPIOPinTypeUART(GPIO_PORTA_BASE, GPIO_PIN_0 | GPIO_PIN_1);
+
+	//
+	// Use the internal 16MHz oscillator as the UART clock source.
+	//
+	UARTClockSourceSet(UART0_BASE, UART_CLOCK_PIOSC);
+
+	//
+	// Initialize the UART for console I/O.
+	//
+	UARTStdioConfig(0, 115200, 16000000);
+
+	UARTprintf("Mr. Hammond, the UART is working.");
+}
+
+//*****************************************************************************
+//
+// UART to Command Line interface
+//
+//*****************************************************************************
+void CmdLineFxn(void){
+    UARTprintf("\n>");
+
+    //
+    // Peek to see if a full command is ready for processing
+    //
+    while(UARTPeek('\r') == -1)
+    {
+        //
+        // millisecond delay.  A SysCtlSleep() here would also be OK.
+        //
+        SysCtlDelay(SysCtlClockGet() / (1000 / 3));
+
+        //
+        // Check for change of mode and enter hibernate if requested.
+        // all other mode changes handled in interrupt context.
+        //
+//        if(g_sAppState.ui32Mode == APP_MODE_HIB)
+//        {
+//            AppHibernateEnter();
+//        }
+    }
+}
+
+//*****************************************************************************
+//
+// Input buffer for the command line interpreter.
+//
+//*****************************************************************************
+#define APP_INPUT_BUF_SIZE 128
+static char g_cInput[APP_INPUT_BUF_SIZE];
+
+//*****************************************************************************
+//
 // Main Application Entrance
 //
 //*****************************************************************************
 int
 main(void)
+
 {
 	hardwareInit();
 
-	uart_setup();
+	uartInit();
 
     // Loop forever.
     while(1)
     {
+    	// Check for a user return
+        while(UARTPeek('\r') == -1) {
+
+        }
+
+        //
+        // a '\r' was detected get the line of text from the user.
+        //
+        UARTgets(g_cInput,sizeof(g_cInput));
+        UARTprintf("\nMaybe it's the power trying to come back on...");
+
         // Cycle LEDs
-    	if (0) {
+    	if (1) {
     		cycle_leds();
     	}
     }
