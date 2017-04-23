@@ -54,6 +54,7 @@
 // from qs-rgb
 #include "utils/uartstdio.h"
 #include "utils/cmdline.h"
+#include "drivers/rgb.h"
 
 
 
@@ -118,6 +119,31 @@ void cycle_leds(void) {
 
         // Delay for a while.
         ROM_SysCtlDelay(1000000);
+	}
+}
+
+//*****************************************************************************
+//
+// Function to cycle LEDs using RGB tool
+//
+//*****************************************************************************
+void cycle_leds_rgb(void) {
+	int i = 0;
+	volatile uint32_t ui32Color[3];
+
+	for (i=0; i<3; i++) {
+		ui32Color[0] = 0;
+		ui32Color[1] = 0;
+		ui32Color[2] = 0;
+
+		ui32Color[i] = 0xFFFF;
+
+		RGBColorSet(ui32Color);
+
+		RGBEnable();
+		ROM_SysCtlDelay(1000000);
+//		RGBDisable();
+//		ROM_SysCtlDelay(1000000);
 	}
 }
 
@@ -223,16 +249,20 @@ int
 main(void)
 
 {
-	hardwareInit();
-
+//	hardwareInit();
 	uartInit();
+
+	RGBInit(1);
+	volatile uint32_t ui32Color[3] = {0,0,0};
+	RGBSet(ui32Color, 0.1f);
+	RGBEnable();
 
     // Loop forever.
     while(1)
     {
     	// Check for a user return
         while(UARTPeek('\r') == -1) {
-
+            SysCtlDelay(SysCtlClockGet() / (1000 / 3));
         }
 
         //
@@ -240,10 +270,8 @@ main(void)
         //
         UARTgets(g_cInput,sizeof(g_cInput));
         UARTprintf("\nMaybe it's the power trying to come back on...");
+		cycle_leds_rgb();
 
-        // Cycle LEDs
-    	if (1) {
-    		cycle_leds();
-    	}
+
     }
 }
